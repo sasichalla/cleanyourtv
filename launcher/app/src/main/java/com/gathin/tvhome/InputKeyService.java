@@ -28,6 +28,8 @@ public class InputKeyService extends AccessibilityService {
     /** app_keys "front:" entries, chosen the way HomeKeyService chooses them (RemoteKeys.tap). */
     private Map<Integer, String> frontAppKeys = Collections.emptyMap();
     private Map<Integer, String> frontAppScancodes = Collections.emptyMap();
+    /** RemoteButtons.generation() when the maps were read. */
+    private int keysGeneration;
     /** restore_key_services was on when the config was read: this helper is noted for ServiceRepair. */
     private boolean repairRecord;
     /** consume_volume_keys: Volume Up/Down go to VolumeKeys instead of on to the firmware. */
@@ -48,15 +50,21 @@ public class InputKeyService extends AccessibilityService {
         if (repairRecord) ServiceRepair.connected(this, getClass());
         inputKeycodes = config.inputKeycodes;
         consumeVolumeKeys = config.consumeVolumeKeys;
+        loadKeys(config);
+        RemoteKeys.applyKeyFilter(this, config.keyFilter);
+        // gamepad_passthrough and volume_pauses_filter, off by default.
+        if (gamepads == null) gamepads = GamepadPassthrough.start(this, config);
+    }
+
+    /** The app_keys maps, built-in plus the buttons mapped on the TV (RemoteButtons). */
+    private void loadKeys(Config config) {
+        keysGeneration = RemoteButtons.generation();
         appKeys = RemoteKeys.parseAppKeys(config.appKeys);
         appScancodes = RemoteKeys.parseAppScancodes(config.appKeys);
-        RemoteKeys.applyKeyFilter(this, config.keyFilter);
         holdAppKeys = RemoteKeys.parseHoldAppKeys(config.appKeys);
         holdAppScancodes = RemoteKeys.parseHoldAppScancodes(config.appKeys);
         frontAppKeys = RemoteKeys.parseFrontAppKeys(config.appKeys);
         frontAppScancodes = RemoteKeys.parseFrontAppScancodes(config.appKeys);
-        // gamepad_passthrough and volume_pauses_filter, off by default.
-        if (gamepads == null) gamepads = GamepadPassthrough.start(this, config);
     }
 
     private boolean isInputKey(int keyCode) {
@@ -67,6 +75,10 @@ public class InputKeyService extends AccessibilityService {
 
     @Override
     protected boolean onKeyEvent(KeyEvent event) {
+        // The remap screen is waiting for a button: it gets this one instead.
+        if (RemoteButtons.learn(event)) return true;
+        // A button was remapped on the TV since the maps were read.
+        if (keysGeneration != RemoteButtons.generation()) loadKeys(Config.load(this));
         if (consumeVolumeKeys && VolumeKeys.handle(this, event)) return true;
         // A scancode entry is more specific than any keycode, so it goes first.
         if (RemoteKeys.handle(this, event, RemoteKeys.tap(appScancodes.get(event.getScanCode()),

@@ -168,6 +168,8 @@ public final class LauncherSettingsActivity extends Activity {
             changed();
             refresh();
         });
+        findViewById(R.id.remoteButtonsChoice).setOnClickListener(v ->
+                open(new Intent(this, RemoteButtonsActivity.class)));
         findViewById(R.id.defaultHomeChoice).setOnClickListener(v ->
                 open(new Intent(this, HomeSettingsActivity.class)));
         findViewById(R.id.tvSettingsChoice).setOnClickListener(v ->

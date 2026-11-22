@@ -65,6 +65,10 @@ The launcher's own page has these rows, top to bottom:
   time Home comes up after the TV starts. Once per boot, so Home and Back still reach the launcher.
 - **Follow theme (reset on-TV choices)**, which clears every choice above. Pushing or resetting a theme
   clears them too.
+- **Remote buttons**: press **Add or change a button**, press a button on the remote, and pick an app, a TV
+  input or an action for it. Mappings made here go on top of `app_keys` (config.xml or a theme), survive theme
+  pushes, and can be renamed or reset per button. Needs a key helper bound with `key_filter` on
+  (`INPUT_KEY_SERVICE=1` or `HOME_KEY_SERVICE=1`); D-pad, OK, Back, Home, volume and power can't be remapped.
 - **Choose default home** opens Android's home picker, and **TV system settings** the TV's own settings
   page.
 

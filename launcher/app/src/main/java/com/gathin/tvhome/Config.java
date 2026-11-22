@@ -669,6 +669,12 @@ final class Config {
             glowStyle = string(json, "glow_style", glowStyle);
             glassStyle = string(json, "glass_style", glassStyle);
         }
+        // Buttons mapped on the TV (Launcher settings > Remote buttons) go last, so they win for the same key.
+        List<String> onTvKeys = RemoteButtons.saved(ctx);
+        if (!onTvKeys.isEmpty()) {
+            appKeys = new ArrayList<>(appKeys);
+            appKeys.addAll(onTvKeys);
+        }
         // A top-bar app is moved there, not copied: it leaves the grid.
         for (String pkg : topBarApps) if (!hidden.contains(pkg)) hidden.add(pkg);
         // A theme push or reset invalidates choices made on the TV. On first use, remember the

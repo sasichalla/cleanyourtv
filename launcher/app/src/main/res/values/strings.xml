@@ -158,4 +158,27 @@
     <string name="clock_format_system">System</string>
     <string name="clock_format_12">12-hour</string>
     <string name="clock_format_24">24-hour</string>
+    <!-- Launcher settings > Remote buttons (RemoteButtonsActivity); local addition, English only. -->
+    <string name="remote_buttons" translatable="false">Remote buttons</string>
+    <string name="remote_buttons_help" translatable="false">Give a remote button a new job: an app, a TV input or an action. Navigation, OK, Back, Home, volume and power always keep theirs.</string>
+    <string name="remote_buttons_add" translatable="false">Add or change a button</string>
+    <string name="remote_buttons_none" translatable="false">No buttons mapped yet.</string>
+    <string name="remote_buttons_legend" translatable="false">\u2022 changed on this TV. Select a button to change, rename or reset it.</string>
+    <string name="remote_buttons_press" translatable="false">Press a button on the remote</string>
+    <string name="remote_buttons_press_help" translatable="false">Press the button you want to map now. Back cancels.</string>
+    <string name="remote_buttons_no_helper" translatable="false">Remapping needs the launcher\'s remote button helper. Turn on \"Home\" under Accessibility, then try again.</string>
+    <string name="remote_buttons_open_accessibility" translatable="false">Open Accessibility</string>
+    <string name="remote_buttons_change" translatable="false">Change what it does</string>
+    <string name="remote_buttons_rename" translatable="false">Name this button</string>
+    <string name="remote_buttons_reset" translatable="false">Reset to default</string>
+    <string name="remote_buttons_pick" translatable="false">%1$s should open</string>
+    <string name="remote_buttons_saved" translatable="false">%1$s \u2192 %2$s</string>
+    <string name="remote_buttons_target_ignore" translatable="false">Nothing (ignore the button)</string>
+    <string name="remote_buttons_target_screensaver" translatable="false">Screensaver</string>
+    <string name="remote_buttons_target_inputs" translatable="false">Inputs menu</string>
+    <string name="remote_buttons_target_home" translatable="false">Home</string>
+    <string name="remote_buttons_target_mute" translatable="false">Mute</string>
+    <string name="remote_buttons_target_sleep" translatable="false">Sleep (standby)</string>
+    <string name="remote_buttons_target_wifi" translatable="false">Network settings</string>
+    <string name="remote_buttons_target_input" translatable="false">Input: %1$s</string>
 </resources>

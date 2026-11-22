@@ -65,6 +65,8 @@ public class HomeKeyService extends AccessibilityService {
     private Map<Integer, String> appScancodes = Collections.emptyMap();
     private Map<Integer, String> holdAppKeys = Collections.emptyMap();
     private Map<Integer, String> holdAppScancodes = Collections.emptyMap();
+    /** RemoteButtons.generation() when the maps were read. */
+    private int keysGeneration;
 
     /** Waits for the user to unlock when Android binds this service at boot; null once the config is read. */
     private BroadcastReceiver unlockReceiver;
@@ -183,6 +185,17 @@ public class HomeKeyService extends AccessibilityService {
         GuardKeep.stepOut(this);
     }
 
+    /** The app_keys maps, built-in plus the buttons mapped on the TV (RemoteButtons). */
+    private void loadKeys(Config config) {
+        keysGeneration = RemoteButtons.generation();
+        appKeys = RemoteKeys.parseAppKeys(config.appKeys);
+        appScancodes = RemoteKeys.parseAppScancodes(config.appKeys);
+        holdAppKeys = RemoteKeys.parseHoldAppKeys(config.appKeys);
+        holdAppScancodes = RemoteKeys.parseHoldAppScancodes(config.appKeys);
+        frontAppKeys = RemoteKeys.parseFrontAppKeys(config.appKeys);
+        frontAppScancodes = RemoteKeys.parseFrontAppScancodes(config.appKeys);
+    }
+
     private void loadConfig() {
         // Keycodes and the panel choice can also come from a theme; theme.sh restarts this service.
         Config config = Config.load(this);
@@ -194,12 +207,9 @@ public class HomeKeyService extends AccessibilityService {
         settingsPanel = config.settingsKeyPanel;
         settingsClearTask = config.settingsKeyClearTask;
         consumeVolumeKeys = config.consumeVolumeKeys;
-        appKeys = RemoteKeys.parseAppKeys(config.appKeys);
-        appScancodes = RemoteKeys.parseAppScancodes(config.appKeys);
+        loadKeys(config);
         RemoteKeys.applyKeyFilter(this, config.keyFilter);
         homeLongPressHome = config.homeLongPressHome;
-        frontAppKeys = RemoteKeys.parseFrontAppKeys(config.appKeys);
-        frontAppScancodes = RemoteKeys.parseFrontAppScancodes(config.appKeys);
         boolean watchFront = !frontAppKeys.isEmpty() || !frontAppScancodes.isEmpty();
         stockHome.clear();
         stockHomePackage = config.stockHomeRedirect;
@@ -265,6 +275,8 @@ public class HomeKeyService extends AccessibilityService {
                 && event.getKeyCode() != KeyEvent.KEYCODE_POWER && event.getKeyCode() != KeyEvent.KEYCODE_WAKEUP) {
             powerOnUntil = 0;
         }
+        if (RemoteButtons.learn(event)) return true;
+        if (unlockReceiver == null && keysGeneration != RemoteButtons.generation()) loadKeys(Config.load(this));
         if (consumeVolumeKeys && VolumeKeys.handle(this, event)) return true;
         // A scancode entry is more specific than any keycode, so it goes first.
         if (RemoteKeys.handle(this, event, inFront(appScancodes, frontAppScancodes, event.getScanCode()),
