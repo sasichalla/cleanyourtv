@@ -3,6 +3,7 @@ package com.gathin.tvhome;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -62,6 +63,7 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -3525,22 +3527,33 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     for (TvInputInfo device : devices) {
                         CharSequence name = InputNames.tidy(device.loadCustomLabel(this));
                         if (name == null || name.length() == 0) name = named ? custom : device.loadLabel(this);
+                        // A name given on the TV (hold OK, Rename) follows the device's own name, whatever the port.
+                        final String original = name == null || name.length() == 0 ? null : name.toString();
+                        String alias = InputAliases.get(this, original);
+                        if (alias != null) name = alias;
                         String deviceLabel = name == null || name.length() == 0 ? label : name + " \u00B7 " + label;
                         final String deviceId = device.getId();
                         int state = hdmiStateBogus && !inputsCecStateOnly ? -1 : tim.getInputState(deviceId);
                         View row = addInputRow(rows, popup, R.drawable.ic_input, deviceLabel, state, () -> openInput(deviceId));
+                        final String renameKey = original != null ? original : label;
+                        row.setOnLongClickListener(v -> renameInput(popup, renameKey));
                         if (connectedOnly && InputFold.folds(true, state)) fold(row, folded);
                     }
                     continue;
                 }
-                // The name given in Settings > Inputs (e.g. "MacBook Pro") goes first, the port after it.
-                if (named) label = custom + " \u00B7 " + label;
+                // The name given in Settings > Inputs (e.g. "MacBook Pro") goes first, the port after it; a name
+                // given on the TV (hold OK, Rename) replaces it.
+                final String portKey = named ? custom.toString() : label;
+                String portAlias = InputAliases.get(this, portKey);
+                if (portAlias != null) label = portAlias + " \u00B7 " + label;
+                else if (named) label = custom + " \u00B7 " + label;
                 final String id = info.getId();
                 // Analog AV jacks have no hotplug detection, and some TVs report them as always connected
                 // (TCL Smart TV Pro G03 says "Connected" with nothing plugged in), so AV rows show no state.
                 int state = !hdmi || hdmiStateBogus ? -1 : tim.getInputState(id);
                 View row = addInputRow(rows, popup, hdmi ? R.drawable.ic_input : R.drawable.ic_av, label, state,
                         () -> openInput(id));
+                row.setOnLongClickListener(v -> renameInput(popup, portKey));
                 if (connectedOnly && InputFold.folds(hdmi, state)) fold(row, folded);
             }
         }
@@ -3685,6 +3698,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         });
         rows.addView(row);
         return row;
+    }
+
+    /** Hold OK on an Inputs row: give it a name of its own, or go back to the TV's (InputAliases). */
+    private boolean renameInput(PopupWindow popup, String original) {
+        popup.dismiss();
+        EditText field = new EditText(this);
+        field.setSingleLine(true);
+        field.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        String current = InputAliases.get(this, original);
+        field.setText(current != null ? current : "");
+        field.setHint(original);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.input_rename_title, original))
+                .setView(field)
+                .setPositiveButton(android.R.string.ok, (d, w) -> InputAliases.set(this, original, field.getText().toString()))
+                .setNegativeButton(android.R.string.cancel, null);
+        if (current != null) dialog.setNeutralButton(R.string.input_rename_reset, (d, w) -> InputAliases.set(this, original, null));
+        dialog.show();
+        return true;
     }
 
     // ---- launcher settings and module cards -------------------------------------------------------

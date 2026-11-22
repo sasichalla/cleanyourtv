@@ -74,6 +74,11 @@ CleanYourTV as Home, or CleanYourTV to return. The original launcher must be ena
 script disabled it, run the [restore script](../README.md#restoring-your-tv) first. Some TVs provide no
 home picker.
 
+**Rename an input:** hold OK on a row in the Inputs menu and type a name, for a TV whose own settings can't
+rename inputs, or a CEC device that calls itself something like "Playback_1". The name is kept by the launcher and
+follows the input's own name rather than its port, so a device keeps it when it moves to another HDMI port; "Use the
+TV's name" in the same dialog removes it.
+
 ## Languages
 
 English, German, Danish, Spanish, Latin American Spanish, Catalan, French, Russian, Serbian (Latin), Polish, Czech, Italian, Portuguese,

@@ -158,4 +158,7 @@
     <string name="clock_format_system">System</string>
     <string name="clock_format_12">12-hour</string>
     <string name="clock_format_24">24-hour</string>
+    <!-- Inputs menu: hold OK on a row (InputAliases). English only for now. -->
+    <string name="input_rename_title" translatable="false">Rename %1$s</string>
+    <string name="input_rename_reset" translatable="false">Use the TV\'s name</string>
 </resources>
